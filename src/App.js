@@ -62,7 +62,7 @@ function SearchFormPage(props) {
           required
           label="inmate name or ID number"
           id="outlined-search" type="search" variant="outlined"
-          error={error}
+          error={!!error}
           helperText={error}
           onChange={handleChange}
         />
