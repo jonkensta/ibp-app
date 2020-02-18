@@ -62,7 +62,7 @@ function SearchFormPage(props) {
           required
           label="inmate name or ID number"
           id="outlined-search" type="search" variant="outlined"
-          error={!!error}
+          error={Boolean(error)}
           helperText={error}
           onChange={handleChange}
         />
@@ -127,7 +127,7 @@ function SearchResultsPage(props) {
     );
   };
 
-  const fields = ['Name', 'Jurisdiction', 'ID', 'Unit'];
+  const fields = ["Name", "Jurisdiction", "ID", "Unit"];
   const ResultsTableHead = () => (
     <TableHead>
       <TableRow>
