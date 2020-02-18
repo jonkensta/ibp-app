@@ -150,7 +150,7 @@ function SearchResultsPage(props) {
 
     return (
       <TableRow
-        hover key={props.key} className={classes.tableRow}
+        hover className={classes.tableRow}
         onClick={() => {
           document.location = `inmate/${props.jurisdiction}/${props.id}`;
         }}
