@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 
 import {
-  Grid,
+  Grid, Container,
   TextField,
   CircularProgress,
   Snackbar, SnackbarContent,
@@ -27,25 +27,17 @@ import {
   CommentTable as InmateCommentTable,
 } from './inmate';
 
-const URL_BASE = "http://localhost:8000";
+const URL_BASE = "http://localhost:3000";
 
 function PageNotFoundPage() {
   let location_ = useLocation();
   return <h3>No match for <code>{location_.pathname}</code></h3>;
 }
 
-function SearchFormPage(props) {
+function SearchForm(props) {
   const [ query, setQuery ] = useState(null);
-  const error = props.location && props.location.state && props.location.state.error;
 
   const handleSubmit = (event) => {
-    if (error) {
-      const state = {...props.location.state};
-      delete state.error;
-
-      const location = {...props.location, state}
-      props.history.replace({location});
-    }
     event.preventDefault();
     document.location = `/search?query=${query}`;
   };
@@ -55,28 +47,27 @@ function SearchFormPage(props) {
   };
 
   return (
-    <Grid item xs={8} lg={4} variant="outlined">
-      <form autoComplete="off" onSubmit={handleSubmit}>
-        <TextField
-          fullWidth
-          required
-          label="inmate name or ID number"
-          id="outlined-search" type="search" variant="outlined"
-          error={Boolean(error)}
-          helperText={error}
-          onChange={handleChange}
-        />
-      </form>
-    </Grid>
+    <form autoComplete="off" onSubmit={handleSubmit}>
+      <TextField
+        fullWidth
+        required
+        label="inmate name or ID number"
+        id="outlined-search" type="search" variant="outlined"
+        error={Boolean(props.error)}
+        helperText={props.error}
+        onChange={handleChange}
+      />
+    </form>
   );
 }
 
+const useStyles = makeStyles(theme => ({
+  tableRow: {
+    cursor: 'pointer',
+  }
+}));
+
 function SearchResultsPage(props) {
-  const useStyles = makeStyles({
-    tableRow: {
-      cursor: 'pointer',
-    },
-  });
   const classes = useStyles();
 
   const [ results, setResults ] = useState(null);
@@ -104,28 +95,25 @@ function SearchResultsPage(props) {
   }, [query]);
 
   if (error) {
-    return <Redirect to={{pathname: "/", state: { error: error }}}/>;
+    props.setInputError(error);
+    return <Redirect to={{pathname: "/" }}/>;
   }
 
   if (!results) {
     return <CircularProgress />;
   }
 
-  if (!(results.inmates && results.inmates.length)) {
-    const error = "No inmates matched your search."
-    return <Redirect to={{pathname: "/", state: { error: error }}}/>;
+  if (!(results.inmates && results.inmates.length > 0)) {
+    props.setInputError("No inmates matched your search.");
+    return <Redirect to={{pathname: "/" }} />
   }
 
-  const ResultsErrors = (props) => {
-    if (!props.errors || props.errors.length === 0 || !props.errors.length) {
-      return <></>;
-    }
-    return (
-      <Snackbar open={true}>
-        {props.errors.map((error, index) => <SnackbarContent message={error} />)}
-      </Snackbar>
-    );
-  };
+  props.setResultsErrors(results.errors);
+
+  if (results.inmates.length && results.inmates.length === 1) {
+    const inmate = results.inmates[0];
+    return <Redirect to={{pathname: `inmate/${inmate.jurisdiction}/${inmate.id}`}} />;
+  }
 
   const fields = ["Name", "Jurisdiction", "ID", "Unit"];
   const ResultsTableHead = () => (
@@ -174,7 +162,6 @@ function SearchResultsPage(props) {
 
   return (
     <Grid item xs={8} lg={5} component={Card} variant="outlined">
-      <ResultsErrors errors={results.errors} />
       <Table>
         <ResultsTableHead />
         <ResultsTableBody inmates={results.inmates} />
@@ -185,18 +172,18 @@ function SearchResultsPage(props) {
 
 function InmatePage(props) {
   const { jurisdiction, id } = useParams();
-  const [ inmate, setInmate ] = useState(null);
   const [ error, setError ] = useState(null);
+  const [ results, setResults ] = useState(null);
 
   useEffect(() => {
     async function getInmate(jurisdiction, id) {
       const endpoint = `${URL_BASE}/inmate/${jurisdiction}/${id}`;
-      const response = await fetch(endpoint);
+      const response = await fetch(endpoint, {credentials: "same-origin"});
       const json = await response.json();
       if (!response.ok) {
         setError(json);
       } else {
-        setInmate(json);
+        setResults(json);
       }
     }
     getInmate(jurisdiction, id)
@@ -206,34 +193,35 @@ function InmatePage(props) {
     return <h3>No inmate matched given URL parameters.</h3>;
   }
 
-  if (!inmate) {
+  if (!results) {
     return <CircularProgress />;
   }
 
   return (
     <>
       <Grid item xs={8} lg={3} component={Card} variant="outlined">
-        <CardHeader title="Inmate Information"/>
+        <CardHeader title="Inmate Information" />
         <CardContent>
-          <InmateInfoTable {...inmate}/>
+          <InmateInfoTable {...results.inmate} />
         </CardContent>
       </Grid>
       <Grid item xs={8} lg={3} component={Card} variant="outlined">
         <CardHeader title="Requests"/>
         <InmateRequestTable
-          url_base={URL_BASE}
+          urlBase={URL_BASE}
           Container={CardContent}
           jurisdiction={jurisdiction} id={id}
-          requests={inmate.requests}
+          requests={results.inmate.requests}
+          defaultDatePostmarked={results.datePostmarked}
         />
       </Grid>
       <Grid item xs={8} lg={4} component={Card} variant="outlined">
         <CardHeader title="Comments"/>
         <InmateCommentTable
-          url_base={URL_BASE}
+          urlBase={URL_BASE}
           Container={CardContent}
           jurisdiction={jurisdiction} id={id}
-          comments={inmate.comments}
+          comments={results.inmate.comments}
         />
       </Grid>
     </>
@@ -241,30 +229,65 @@ function InmatePage(props) {
 };
 
 export default () => {
+  const [ searchError, setSearchError ] = useState(null);
+  const [ snackbarErrors, setSnackbarErrors ] = useState([]);
+
+  const searchResultsPage = (
+    <SearchResultsPage
+      setInputError={setSearchError}
+      setResultsErrors={setSnackbarErrors}
+    />
+  );
+
   return (
-    <Grid
-      container
-      direction="column"
-      alignitems="center"
-      justify="center"
-      style={{ minHeight: '90vh' }}
-      spacing={8}
-    >
+    <Container maxWidth="xl">
       <Grid
         container
-        direction="row"
-        justify="space-evenly"
-        alignitems="stretch"
+        direction="column"
+        alignitems="center"
+        justify="center"
+        style={{ minHeight: '10vh' }}
       >
-        <Router>
-          <Switch>
-            <Route exact path="/" component={SearchFormPage} />
-            <Route exact path="/search" component={SearchResultsPage} />
-            <Route exact path="/inmate/:jurisdiction/:id" component={InmatePage} />
-            <Route path="*" component={PageNotFoundPage} />
-          </Switch>
-        </Router>
+        <Grid container direction="row" justify="space-evenly" alignitems="stretch">
+          <Grid item xs={8} lg={5}>
+            <SearchForm error={searchError} />
+          </Grid>
+        </Grid>
       </Grid>
-    </Grid>
+
+      <Grid
+        container
+        direction="column"
+        alignitems="center"
+        justify="center"
+        style={{ minHeight: '5vh' }}
+      >
+      </Grid>
+
+      <Grid
+        container
+        direction="column"
+        alignitems="center"
+        justify="center"
+        style={{ minHeight: '80vh' }}
+        spacing={8}
+      >
+        <Grid container direction="row" justify="space-evenly" alignitems="stretch">
+          <Router>
+            <Switch>
+              <Route exact path="/" />
+              <Route exact path="/search" children={searchResultsPage} />
+              <Route exact path="/inmate/:jurisdiction/:id" children={<InmatePage />} />
+              <Route path="*" children={<PageNotFoundPage />} />
+            </Switch>
+          </Router>
+        </Grid>
+      </Grid>
+
+      {snackbarErrors.length > 0 && snackbarErrors.map((error, index) => (
+        <Snackbar open={true} message={error} key={index} />
+      ))}
+
+    </Container>
   );
 }

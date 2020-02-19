@@ -11,7 +11,6 @@ import {
 
 import MaterialTable, { MTableEditField } from "material-table";
 
-
 export function FullName(props) {
   const url = props.url;
   const fullName = props.first + ' ' + props.last;
@@ -90,11 +89,12 @@ function DataTable(props) {
   };
 
   async function onRowAdd(newData) {
-    const url = props.url_base;
+    const url = props.urlBase;
     const response = await fetch(url, {
       method: 'POST',
       body: JSON.stringify(newData),
-      headers: {'Content-Type': 'application/json'}
+      headers: {'Content-Type': 'application/json'},
+      credentials: "same-origin"
     });
 
     const json = await response.json();
@@ -114,7 +114,7 @@ function DataTable(props) {
   }
 
   async function onRowUpdate(newData, oldData) {
-    const url = `${props.url_base}/${oldData.index}`;
+    const url = `${props.urlBase}/${oldData.index}`;
     const response = await fetch(url, {
       method: 'PUT',
       body: JSON.stringify(newData),
@@ -136,7 +136,7 @@ function DataTable(props) {
   }
 
   async function onRowDelete(oldData) {
-    const url = `${props.url_base}/${oldData.index}`;
+    const url = `${props.urlBase}/${oldData.index}`;
     const response = await fetch(url, {
       headers: {'Content-Type': 'application/json'},
       method: 'DELETE'
@@ -181,12 +181,18 @@ export function RequestTable(props) {
   return (
     <DataTable
       columns={[
-        {title: "Postmark Date", field: "date_postmarked", type: "date"},
-        {title: "Action", field: "action", lookup: {Filled: "Filled", Tossed: "Tossed"}},
+        {
+          title: "Postmark Date", field: "date_postmarked", type: "date",
+          initialEditValue: props.defaultDatePostmarked
+        },
+        {
+          title: "Action", field: "action", initialEditValue: "Filled",
+          lookup: {Filled: "Filled", Tossed: "Tossed"}
+        },
       ]}
       data={props.requests}
       Container={props.Container}
-      url_base={`${props.url_base}/request/${props.jurisdiction}/${props.id}`}
+      urlBase={`${props.urlBase}/request/${props.jurisdiction}/${props.id}`}
     />
   );
 }
@@ -201,7 +207,7 @@ export function CommentTable(props) {
       ]}
       data={props.comments}
       Container={props.Container}
-      url_base={`${props.url_base}/comment/${props.jurisdiction}/${props.id}`}
+      urlBase={`${props.urlBase}/comment/${props.jurisdiction}/${props.id}`}
     />
   );
 };
