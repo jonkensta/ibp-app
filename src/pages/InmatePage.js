@@ -22,10 +22,10 @@ export default (props) => {
       const url = `${props.urlBase}/inmate/${jurisdiction}/${id}`;
       const response = await fetch(url);
       const json = await response.json();
-      if (!response.ok) {
-        setError(json);
-      } else {
+      if (response.ok) {
         setResults(json);
+      } else {
+        setError(json);
       }
     };
     getInmate(jurisdiction, id);
