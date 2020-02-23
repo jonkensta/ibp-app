@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 import { Grid, Container, CircularProgress } from "@material-ui/core"
 
@@ -93,7 +93,7 @@ export default (props) => {
         direction="column"
         alignitems="center"
         justify="center"
-        style={{ minHeight: '10vh' }}
+        style={{ minHeight: "10vh" }}
       >
         <Grid container direction="row" justify="space-evenly" alignitems="stretch">
           <Grid item xs={8} lg={5}>
@@ -107,7 +107,7 @@ export default (props) => {
         direction="column"
         alignitems="center"
         justify="center"
-        style={{ minHeight: '5vh' }}
+        style={{ minHeight: "5vh" }}
       >
       </Grid>
 
@@ -116,7 +116,7 @@ export default (props) => {
         direction="column"
         alignitems="center"
         justify="center"
-        style={{ minHeight: '80vh' }}
+        style={{ minHeight: "80vh" }}
         spacing={8}
       >
         <Grid container direction="row" justify="space-evenly" alignitems="stretch">

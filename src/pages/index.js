@@ -1,1 +1,1 @@
-export { default as InmatePage } from './InmatePage';
+export { default as InmatePage } from "./InmatePage";

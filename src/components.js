@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import { TextField } from '@material-ui/core';
-import { FormControl, FormHelperText } from '@material-ui/core';
-import { Table, TableBody, TableRow, TableCell, TableHead } from '@material-ui/core';
+import { TextField } from "@material-ui/core";
+import { FormControl, FormHelperText } from "@material-ui/core";
+import { Table, TableBody, TableRow, TableCell, TableHead } from "@material-ui/core";
 
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from "@material-ui/core/styles";
 
 import MaterialTable, { MTableEditField } from "material-table";
 
 export const FullName = (props) => {
   const url = props.url;
-  const fullName = props.first + ' ' + props.last;
+  const fullName = props.first + " " + props.last;
   const name = props.first && props.last&& fullName;
   const name_with_url = name && <a href={url}>{name}</a>;
   return name_with_url || name || <>Not Available</>;
@@ -43,12 +43,12 @@ export const Release = (props) => {
 
 export const InfoTable = (props) => {
   const components = {
-    'Name': <FullName first={props.first_name} last={props.last_name} url={props.url}/>,
-    'Jurisdiction': <Jurisdiction jurisdiction={props.jurisdiction}/>,
-    'ID': <FormattedID id={props.id}/>,
-    'Sex': <Sex sex={props.sex}/>,
-    'Unit': <Unit {...props.unit}/>,
-    'Release': <Release release={props.release}/>,
+    "Name": <FullName first={props.first_name} last={props.last_name} url={props.url}/>,
+    "Jurisdiction": <Jurisdiction jurisdiction={props.jurisdiction}/>,
+    "ID": <FormattedID id={props.id}/>,
+    "Sex": <Sex sex={props.sex}/>,
+    "Unit": <Unit {...props.unit}/>,
+    "Release": <Release release={props.release}/>,
   };
 
   return (
@@ -57,7 +57,7 @@ export const InfoTable = (props) => {
         {Object.keys(components).map((key, index) => (
         <TableRow key={index}>
           <TableCell component="th" scope="row">
-            {key + ':'}
+            {key + ":"}
           </TableCell>
           <TableCell>
             {components[key]}
@@ -79,7 +79,7 @@ export const DataTable = (props) => {
       return (
         <FormControl error={ field in errors }>
           {super.render()}
-          <FormHelperText>{ (field in errors) ? errors[field] : '' }</FormHelperText>
+          <FormHelperText>{ (field in errors) ? errors[field] : "" }</FormHelperText>
         </FormControl>
       );
     }
@@ -140,12 +140,12 @@ export const DataTable = (props) => {
         search: false,
         showTitle: false,
         pageSize: 5,
-        addRowPosition: 'first',
+        addRowPosition: "first",
         pageSizeOptions: [],
-        minBodyHeight: '400px',
-        maxBodyHeight: '400px',
+        minBodyHeight: "400px",
+        maxBodyHeight: "400px",
       }}
-      localization={{header: {actions: ''}}}
+      localization={{header: {actions: ""}}}
       editable={{
         onRowAdd: onRowAdd,
         onRowUpdate: onRowUpdate,
@@ -197,7 +197,7 @@ export const CommentTable = (props) => {
 export const SearchResultsTable = (props) => {
   const useStyles = makeStyles(theme => ({
     tableRow: {
-      cursor: 'pointer',
+      cursor: "pointer",
     }
   }));
   const classes = useStyles();
@@ -208,7 +208,7 @@ export const SearchResultsTable = (props) => {
       <TableRow>
         {fields.map((field, index) => (
         <TableCell component="th" scope="row" key={index}>
-          {field + ':'}
+          {field + ":"}
         </TableCell>
         ))}
       </TableRow>

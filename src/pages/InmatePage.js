@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 import { useParams } from "react-router-dom";
 
@@ -9,7 +9,7 @@ import {
   InfoTable as InmateInfoTable,
   RequestTable as InmateRequestTable,
   CommentTable as InmateCommentTable,
-} from '../components';
+} from "../components";
 
 export default (props) => {
 
@@ -50,7 +50,7 @@ export default (props) => {
       method: method,
       credentials: "same-origin",
       body: data && JSON.stringify(data),
-      headers: {'Content-Type': 'application/json'},
+      headers: {"Content-Type": "application/json"},
     });
   };
 
@@ -58,17 +58,17 @@ export default (props) => {
 
     const handleRequestAdd = async (newRequest) => {
       const url = `${props.urlBase}/request/${jurisdiction}/${id}`;
-      return await fetchHelper(url, 'POST', newRequest);
+      return await fetchHelper(url, "POST", newRequest);
     };
 
     const handleRequestUpdate = async (oldRequest, newRequest) => {
       const url = `${props.urlBase}/request/${jurisdiction}/${id}/${oldRequest.index}`;
-      return await fetchHelper(url, 'PUT', newRequest);
+      return await fetchHelper(url, "PUT", newRequest);
     };
 
     const handleRequestDelete = async (oldRequest) => {
       const url = `${props.urlBase}/request/${jurisdiction}/${id}/${oldRequest.index}`;
-      return await fetchHelper(url, 'DELETE');
+      return await fetchHelper(url, "DELETE");
     };
 
     return (
@@ -88,17 +88,17 @@ export default (props) => {
 
     const handleCommentAdd = async (newComment) => {
       const url = `${props.urlBase}/comment/${jurisdiction}/${id}`;
-      return await fetchHelper(url, 'POST', newComment);
+      return await fetchHelper(url, "POST", newComment);
     };
 
     const handleCommentUpdate = async (oldComment, newComment) => {
       const url = `${props.urlBase}/comment/${jurisdiction}/${id}/${oldComment.index}`;
-      return await fetchHelper(url, 'PUT', newComment);
+      return await fetchHelper(url, "PUT", newComment);
     };
 
     const handleCommentDelete = async (oldComment) => {
       const url = `${props.urlBase}/comment/${jurisdiction}/${id}/${oldComment.index}`;
-      return await fetchHelper(url, 'DELETE');
+      return await fetchHelper(url, "DELETE");
     };
 
     return (
