@@ -177,7 +177,7 @@ export const CommentTable = (props) => {
       columns={[
         {title: "Comment", field: "body"},
         {title: "Author", field: "author"},
-        {title: "Date", field: "date", type: "date", editable: "never"},
+        {title: "Date", field: "datetime", type: "date", editable: "never"},
       ]}
       data={props.data}
       Container={props.Container}
