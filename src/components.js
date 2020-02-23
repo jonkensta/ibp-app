@@ -131,20 +131,29 @@ export const DataTable = (props) => {
     }
   };
 
+  const components = {
+    EditField,
+    Container: props.Container,
+    ...(props.components || {})
+  };
+
+  const options = {
+    search: false,
+    showTitle: false,
+    pageSize: 5,
+    addRowPosition: "first",
+    pageSizeOptions: [],
+    minBodyHeight: "400px",
+    maxBodyHeight: "400px",
+    ...(props.options || {}),
+  };
+
   return (
     <MaterialTable
-      components={{EditField: EditField, Container: props.Container}}
-      columns={props.columns}
+      {...props}
       data={data}
-      options={{
-        search: false,
-        showTitle: false,
-        pageSize: 5,
-        addRowPosition: "first",
-        pageSizeOptions: [],
-        minBodyHeight: "400px",
-        maxBodyHeight: "400px",
-      }}
+      options={options}
+      components={components}
       localization={{header: {actions: ""}}}
       editable={{
         onRowAdd: onRowAdd,
@@ -155,7 +164,7 @@ export const DataTable = (props) => {
   );
 };
 
-export const RequestTable = (props) => {
+export const RequestTable = ({ onRequestAdd, onRequestUpdate, onRequestDelete, ...props}) => {
   return (
     <DataTable
       columns={[
@@ -168,16 +177,15 @@ export const RequestTable = (props) => {
           lookup: {Filled: "Filled", Tossed: "Tossed"}
         },
       ]}
-      data={props.data}
-      Container={props.Container}
-      onRowAdd={props.onRequestAdd}
-      onRowUpdate={props.onRequestUpdate}
-      onRowDelete={props.onRequestDelete}
+      onRowAdd={onRequestAdd}
+      onRowUpdate={onRequestUpdate}
+      onRowDelete={onRequestDelete}
+      {...props}
     />
   );
 };
 
-export const CommentTable = (props) => {
+export const CommentTable = ({onCommentAdd, onCommentUpdate, onCommentDelete, ...props}) => {
   return (
     <DataTable
       columns={[
@@ -185,11 +193,10 @@ export const CommentTable = (props) => {
         {title: "Author", field: "author"},
         {title: "Date", field: "datetime", type: "date", editable: "never"},
       ]}
-      data={props.data}
-      Container={props.Container}
-      onRowAdd={props.onCommentAdd}
-      onRowUpdate={props.onCommentUpdate}
-      onRowDelete={props.onCommentDelete}
+      onRowAdd={onCommentAdd}
+      onRowUpdate={onCommentUpdate}
+      onRowDelete={onCommentDelete}
+      {...props}
     />
   );
 };
