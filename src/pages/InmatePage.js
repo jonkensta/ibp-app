@@ -18,7 +18,7 @@ export default (props) => {
   const [ results, setResults ] = useState(null);
 
   useEffect(() => {
-    async function getInmate(jurisdiction, id) {
+    const getInmate = async (jurisdiction, id) => {
       const url = `${props.urlBase}/inmate/${jurisdiction}/${id}`;
       const response = await fetch(url);
       const json = await response.json();
@@ -27,8 +27,8 @@ export default (props) => {
       } else {
         setResults(json);
       }
-    }
-    getInmate(jurisdiction, id)
+    };
+    getInmate(jurisdiction, id);
   }, [props.urlBase, jurisdiction, id]);
 
   if (error) {
