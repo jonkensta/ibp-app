@@ -96,6 +96,7 @@ export const DataTable = (props) => {
       });
     } else {
       setErrors(json);
+      throw new Error("Bad response from server.")
     }
   };
 
@@ -110,6 +111,7 @@ export const DataTable = (props) => {
       });
     } else {
       setErrors(json);
+      throw new Error("Bad response from server.")
     }
   };
 
@@ -122,6 +124,8 @@ export const DataTable = (props) => {
         newData.splice(newData.indexOf(oldData), 1);
         return newData;
       });
+    } else {
+      throw new Error("Bad response from server.")
     }
   };
 
