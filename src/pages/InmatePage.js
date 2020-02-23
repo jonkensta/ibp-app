@@ -58,22 +58,17 @@ export default (props) => {
 
     const handleRequestAdd = async (newRequest) => {
       const url = `${props.urlBase}/request/${jurisdiction}/${id}`;
-      const response = await fetchHelper(url, 'POST', newRequest);
-      const json = await response.json();
-      return [json, response.ok];
+      return await fetchHelper(url, 'POST', newRequest);
     };
 
     const handleRequestUpdate = async (oldRequest, newRequest) => {
       const url = `${props.urlBase}/request/${jurisdiction}/${id}/${oldRequest.index}`;
-      const response = await fetchHelper(url, 'PUT', newRequest);
-      const json = await response.json();
-      return [json, response.ok];
+      return await fetchHelper(url, 'PUT', newRequest);
     };
 
     const handleRequestDelete = async (oldRequest) => {
       const url = `${props.urlBase}/request/${jurisdiction}/${id}/${oldRequest.index}`;
-      const response = await fetchHelper(url, 'DELETE');
-      return response.ok;
+      return await fetchHelper(url, 'DELETE');
     };
 
     return (
@@ -93,22 +88,17 @@ export default (props) => {
 
     const handleCommentAdd = async (newComment) => {
       const url = `${props.urlBase}/comment/${jurisdiction}/${id}`;
-      const response = await fetchHelper(url, 'POST', newComment);
-      const json = await response.json();
-      return [json, response.ok];
+      return await fetchHelper(url, 'POST', newComment);
     };
 
     const handleCommentUpdate = async (oldComment, newComment) => {
       const url = `${props.urlBase}/comment/${jurisdiction}/${id}/${oldComment.index}`;
-      const response = await fetchHelper(url, 'PUT', newComment);
-      const json = await response.json();
-      return [json, response.ok];
+      return await fetchHelper(url, 'PUT', newComment);
     };
 
     const handleCommentDelete = async (oldComment) => {
       const url = `${props.urlBase}/comment/${jurisdiction}/${id}/${oldComment.index}`;
-      const response = await fetchHelper(url, 'DELETE');
-      return response.ok;
+      return await fetchHelper(url, 'DELETE');
     };
 
     return (

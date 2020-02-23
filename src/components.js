@@ -86,9 +86,10 @@ export const DataTable = (props) => {
   };
 
   const onRowAdd = async (newData) => {
-    const [ json, ok] = await props.onRowAdd(newData);
+    const response = await props.onRowAdd(newData);
+    const json = await response.json();
 
-    if (ok) {
+    if (response.ok) {
       setData(prevState => {
         const newState = [...prevState];
         newState.unshift(json);
@@ -101,9 +102,10 @@ export const DataTable = (props) => {
   };
 
   const onRowUpdate = async (newData, oldData) => {
-    const [ json, ok ] = await props.onRowUpdate(oldData, newData);
+    const response = await props.onRowUpdate(oldData, newData);
+    const json = await response.json();
 
-    if (ok) {
+    if (response.ok) {
       setData(prevState => {
         const data = [...prevState];
         data[data.indexOf(oldData)] = json;
@@ -116,9 +118,9 @@ export const DataTable = (props) => {
   };
 
   const onRowDelete = async (oldData) => {
-    const ok = await props.onRowDelete(oldData);
+    const response = await props.onRowDelete(oldData);
 
-    if (ok) {
+    if (response.ok) {
       setData(prevState => {
         const newData = [...prevState];
         newData.splice(newData.indexOf(oldData), 1);
