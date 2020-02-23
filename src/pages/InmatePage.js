@@ -9,7 +9,7 @@ import {
   InfoTable as InmateInfoTable,
   RequestTable as InmateRequestTable,
   CommentTable as InmateCommentTable,
-} from '../inmate';
+} from '../components';
 
 export default (props) => {
 

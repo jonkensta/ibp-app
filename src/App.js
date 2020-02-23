@@ -6,7 +6,7 @@ import { Redirect, useLocation } from "react-router-dom";
 import { Route, Switch, BrowserRouter as Router } from "react-router-dom";
 
 import { InmatePage } from "./pages";
-import { SearchResultsTable, SearchForm as InmateSearchForm } from "./inmate";
+import { SearchResultsTable, SearchForm as InmateSearchForm } from "./components";
 
 const NoMatch = () => {
   const location_ = useLocation();
