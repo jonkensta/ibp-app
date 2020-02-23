@@ -85,7 +85,7 @@ export const DataTable = (props) => {
     }
   };
 
-  async function onRowAdd(newData) {
+  const onRowAdd = async (newData) => {
     const [ json, ok] = await props.onRowAdd(newData);
 
     if (ok) {
@@ -97,9 +97,9 @@ export const DataTable = (props) => {
     } else {
       setErrors(json);
     }
-  }
+  };
 
-  async function onRowUpdate(newData, oldData) {
+  const onRowUpdate = async (newData, oldData) => {
     const [ json, ok ] = await props.onRowUpdate(oldData, newData);
 
     if (ok) {
@@ -111,9 +111,9 @@ export const DataTable = (props) => {
     } else {
       setErrors(json);
     }
-  }
+  };
 
-  async function onRowDelete(oldData) {
+  const onRowDelete = async (oldData) => {
     const ok = await props.onRowDelete(oldData);
 
     if (ok) {
@@ -123,7 +123,7 @@ export const DataTable = (props) => {
         return newData;
       });
     }
-  }
+  };
 
   return (
     <MaterialTable
