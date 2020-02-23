@@ -23,8 +23,7 @@ export default (props) => {
     url.searchParams.append("query", query);
     const response = await fetch(url);
     const json = await response.json();
-    const ok = response.ok;
-    if (ok) {
+    if (response.ok) {
       setInmates(json.inmates);
     } else {
       setFormError(json);
@@ -52,6 +51,15 @@ export default (props) => {
 
     if (!(formError || inmates)) {
       return <CircularProgress />;
+    }
+
+    if (formError) {
+      return <Redirect to={{pathname: "/"}} />;
+    }
+
+    if (inmates && inmates.length === 0) {
+      setFormError("No inmates matched your search.");
+      return <Redirect to={{pathname: "/"}} />;
     }
 
     if (inmates.length && inmates.length === 1) {
