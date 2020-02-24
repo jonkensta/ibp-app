@@ -55,7 +55,6 @@ export default (props) => {
   };
 
   const RequestsCardContent = () => {
-
     const handleRequestAdd = async (newRequest) => {
       const url = `${props.urlBase}/request/${jurisdiction}/${id}`;
       return await fetchHelper(url, "POST", newRequest);
@@ -71,15 +70,26 @@ export default (props) => {
       return await fetchHelper(url, "DELETE");
     };
 
+    const print_action = (data) => ({
+      icon: "print",
+      tooltip: "Print label",
+      disabled: data.action !== "Filled",
+      onClick: (event, rowData) => {
+        event.preventDefault();
+        alert(`Print label for ${jurisdiction} inmate ${id} ${data.index}.`);
+      }
+    });
+
     return (
       <InmateRequestTable
-        Container={CardContent}
+        components={{Container: CardContent}}
         jurisdiction={jurisdiction} id={id}
         data={results.inmate.requests}
         defaultDatePostmarked={results.datePostmarked}
         onRequestAdd={handleRequestAdd}
         onRequestUpdate={handleRequestUpdate}
         onRequestDelete={handleRequestDelete}
+        actions={[print_action]}
       />
     );
   };
@@ -103,7 +113,7 @@ export default (props) => {
 
     return (
       <InmateCommentTable
-        Container={CardContent}
+        components={{Container: CardContent}}
         jurisdiction={jurisdiction} id={id}
         data={results.inmate.comments}
         onCommentAdd={handleCommentAdd}

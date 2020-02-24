@@ -133,7 +133,6 @@ export const DataTable = (props) => {
 
   const components = {
     EditField,
-    Container: props.Container,
     ...(props.components || {})
   };
 
@@ -164,7 +163,7 @@ export const DataTable = (props) => {
   );
 };
 
-export const RequestTable = ({ onRequestAdd, onRequestUpdate, onRequestDelete, ...props}) => {
+export const RequestTable = ({onRequestAdd, onRequestUpdate, onRequestDelete, ...props}) => {
   return (
     <DataTable
       columns={[
