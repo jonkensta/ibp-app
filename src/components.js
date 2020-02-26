@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 
-import { TextField } from "@material-ui/core";
+import { TextField, Button } from "@material-ui/core";
 import { FormControl, FormHelperText } from "@material-ui/core";
 import { Table, TableBody, TableRow, TableCell, TableHead } from "@material-ui/core";
+import { Dialog, DialogTitle, DialogContent, DialogActions } from "@material-ui/core";
 
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -285,5 +286,33 @@ export const SearchForm = (props) => {
         onChange={handleChange}
       />
     </form>
+  );
+};
+
+export const ConfirmationDialog = (props) => {
+  return (
+    <Dialog
+      open={props.open}
+      keepMounted
+      aria-labelledby="alert-dialog-slide-title"
+    >
+      <DialogTitle id="alert-dialog-slide-title">{"Warnings for this Request"}</DialogTitle>
+      <DialogContent>
+        The following problems were observed with this request:
+        <ul>
+        {props.messages.map((message, index) => (
+          <li key={index}>{message}</li>
+        ))}
+        </ul>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => {props.onClose && props.onClose("Toss")}} color="primary">
+          Toss
+        </Button>
+        <Button onClick={() => {props.onClose && props.onClose("Fill")}} color="primary">
+          Fill anyway
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };

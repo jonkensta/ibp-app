@@ -6,6 +6,7 @@ import { Grid, CircularProgress } from "@material-ui/core"
 import { Card, CardHeader, CardContent } from "@material-ui/core"
 
 import {
+  ConfirmationDialog,
   InfoTable as InmateInfoTable,
   RequestTable as InmateRequestTable,
   CommentTable as InmateCommentTable,
@@ -55,7 +56,38 @@ export default (props) => {
   };
 
   const RequestsCardContent = () => {
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [dialogMessages, setDialogMessages] = useState([]);
+    const [dialogHandler, setDialogHandler] = useState(null);
+
+    const getUserFeedback = async () => {
+      return await new Promise((resolve, reject) => {
+        setDialogHandler(() => (
+          (response) => {
+            resolve(response);
+            setDialogOpen(false);
+          }
+        ));
+      });
+    };
+
     const handleRequestAdd = async (newRequest) => {
+      if (newRequest.action === "Filled") {
+        const endpoint = `${props.urlBase}/warning/${jurisdiction}/${id}`;
+        const url = `${endpoint}?datePostmarked=${newRequest.date_postmarked}`;
+        const response = await fetch(url);
+        const messages = await response.json();
+
+        if (messages && messages.length > 0) {
+          setDialogMessages(messages)
+          setDialogOpen(true);
+          const response = await getUserFeedback();
+          if (response === "Toss") {
+            newRequest.action = "Tossed";
+          }
+        }
+      }
+
       const url = `${props.urlBase}/request/${jurisdiction}/${id}`;
       return await fetchHelper(url, "POST", newRequest);
     };
@@ -81,16 +113,23 @@ export default (props) => {
     });
 
     return (
-      <InmateRequestTable
-        components={{Container: CardContent}}
-        jurisdiction={jurisdiction} id={id}
-        data={results.inmate.requests}
-        defaultDatePostmarked={results.datePostmarked}
-        onRequestAdd={handleRequestAdd}
-        onRequestUpdate={handleRequestUpdate}
-        onRequestDelete={handleRequestDelete}
-        actions={[print_action]}
-      />
+      <>
+        <InmateRequestTable
+          components={{Container: CardContent}}
+          jurisdiction={jurisdiction} id={id}
+          data={results.inmate.requests}
+          defaultDatePostmarked={results.datePostmarked}
+          onRequestAdd={handleRequestAdd}
+          onRequestUpdate={handleRequestUpdate}
+          onRequestDelete={handleRequestDelete}
+          actions={[print_action]}
+        />
+        <ConfirmationDialog
+          open={dialogOpen}
+          onClose={dialogHandler}
+          messages={dialogMessages}
+        />
+      </>
     );
   };
 
