@@ -87,49 +87,51 @@ export const DataTable = (props) => {
   };
 
   const onRowAdd = async (newData) => {
-    const response = await props.onRowAdd(newData);
-    const json = await response.json();
+    const [addedRow, errors] = await props.onRowAdd(newData);
 
-    if (response.ok) {
+    if (errors && errors.length > 0) {
+      setErrors(errors);
+      throw new Error("Bad response from server.")
+    }
+
+    if (addedRow) {
       setData(prevState => {
         const newState = [...prevState];
-        newState.unshift(json);
+        newState.unshift(addedRow);
         return newState;
       });
-    } else {
-      setErrors(json);
-      throw new Error("Bad response from server.")
     }
   };
 
   const onRowUpdate = async (newData, oldData) => {
-    const response = await props.onRowUpdate(oldData, newData);
-    const json = await response.json();
+    const [updatedRow, errors] = await props.onRowUpdate(oldData, newData);
 
-    if (response.ok) {
-      setData(prevState => {
-        const data = [...prevState];
-        data[data.indexOf(oldData)] = json;
-        return data;
-      });
-    } else {
-      setErrors(json);
+    if (errors && errors.length > 0) {
+      setErrors(errors);
       throw new Error("Bad response from server.")
+    }
+
+    if (updatedRow) {
+      setData(prevState => {
+        const newState = [...prevState];
+        newState[newState.indexOf(oldData)] = updatedRow;
+        return newState;
+      });
     }
   };
 
   const onRowDelete = async (oldData) => {
-    const response = await props.onRowDelete(oldData);
+    const ok = await props.onRowDelete(oldData);
 
-    if (response.ok) {
-      setData(prevState => {
-        const newData = [...prevState];
-        newData.splice(newData.indexOf(oldData), 1);
-        return newData;
-      });
-    } else {
+    if (!ok) {
       throw new Error("Bad response from server.")
     }
+
+    setData(prevState => {
+      const newState = [...prevState];
+      newState.splice(newState.indexOf(oldData), 1);
+      return newState;
+    });
   };
 
   const components = {
