@@ -135,13 +135,25 @@ export default (props) => {
       return response.ok;
     };
 
-    const print_action = (data) => ({
+    const downloadLabel = async (index) => {
+      const element = document.createElement("a");
+
+      const url = `${props.urlBase}/label/${jurisdiction}/${id}/${index}`;
+      const headers = {"Content-Type": "image/png"};
+      const response = await fetch(url, {headers});
+      const blob = await response.blob();
+      element.href = URL.createObjectURL(blob);
+
+      element.click();
+    };
+
+    const printAction = (data) => ({
       icon: "print",
       tooltip: "Print label",
       disabled: data.action !== "Filled",
       onClick: (event, rowData) => {
         event.preventDefault();
-        alert(`Print label for ${jurisdiction} inmate ${id} ${data.index}.`);
+        downloadLabel(data.index);
       }
     });
 
@@ -157,7 +169,7 @@ export default (props) => {
           onRequestAdd={handleRequestAdd}
           onRequestUpdate={handleRequestUpdate}
           onRequestDelete={handleRequestDelete}
-          actions={[print_action]}
+          actions={[printAction]}
         />
         <ConfirmationDialog
           open={dialogOpen}
