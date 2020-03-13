@@ -265,7 +265,7 @@ export const SearchResultsTable = (props) => {
 };
 
 export const SearchForm = (props) => {
-  const [ query, setQuery ] = useState(null);
+  const [query, setQuery] = useState(null);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -298,7 +298,9 @@ export const ConfirmationDialog = (props) => {
       keepMounted
       aria-labelledby="alert-dialog-slide-title"
     >
-      <DialogTitle id="alert-dialog-slide-title">{"Warnings for this Request"}</DialogTitle>
+      <DialogTitle id="alert-dialog-slide-title">
+        Warnings for this Request
+      </DialogTitle>
       <DialogContent>
         The following problems were observed with this request:
         <ul>
