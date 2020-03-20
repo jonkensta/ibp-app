@@ -105,20 +105,32 @@ export default (props) => {
 
             const datePostmarked = moment(newRequest.date_postmarked);
 
-            const calculateMinPostmarkDate = (requests) => {
-              const dates = (
-                requests
-                .filter((request) => request.action === "Filled")
-                .map((request) => moment(request.date_postmarked))
-              );
+            const dates = (
+              requests
+              .filter((request) => request.action === "Filled")
+              .map((request) => moment(request.date_postmarked))
+            );
 
-              const latestDate = ((dates.length > 0) && moment.max(dates)) || null;
-              return latestDate && latestDate.add(minPostmarkTimedelta, "days");
-            };
+            const latestDate = ((dates.length > 0) && moment.max(dates)) || null;
+            const timedelta = minPostmarkTimedelta;
+            const minPostmarkDate = latestDate && latestDate.clone().add(timedelta, "days");
 
-            const minPostmarkDate = calculateMinPostmarkDate(requests);
             if (minPostmarkDate && datePostmarked.isBefore(minPostmarkDate)) {
-              yield "This request is too early from date of last request.";
+              console.log(latestDate.format("YYYY-MM-DD"));
+              console.log(datePostmarked.format("YYYY-MM-DD"));
+              const days = datePostmarked.diff(latestDate, "days");
+              console.log(days);
+              if (days !== null && days < 0) {
+                yield "There is a filled request postmarked after this one.";
+              } else if (days !== null && days === 0) {
+                yield "There is a filled request postmarked the same day as this one.";
+              } else if (days !== null && days === 1) {
+                yield "This request is postmarked one day from date of last filled request.";
+              } else if (days !== null) {
+                yield `This request is postmarked ${days} days from date of last filled request.`;
+              } else {
+                yield "This request is postmarked too early from date of last filled request.";
+              }
             }
           }
           const warnings = Array.from(iterateInmateWarnings(inmate));
