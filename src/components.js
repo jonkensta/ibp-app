@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 
-import { TextField, Button, Tooltip, Badge } from "@material-ui/core";
+import { TextField, Button, Tooltip, Badge, Snackbar } from "@material-ui/core";
 import { FormControl, FormHelperText } from "@material-ui/core";
 import { Table, TableBody, TableRow, TableCell, TableHead } from "@material-ui/core";
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@material-ui/core";
+
+import CloseIcon from '@material-ui/icons/Close';
+import IconButton from '@material-ui/core/IconButton';
 
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -427,5 +430,36 @@ export const ConfirmationDialog = (props) => {
         </Button>
       </DialogActions>
     </Dialog>
+  );
+};
+
+export const SimpleSnackbar = (props) => {
+  const [open, setOpen] = React.useState(true);
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+  return (
+    <Snackbar
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'left',
+      }}
+      open={open}
+      onClose={handleClose}
+      message={props.message}
+      action={
+        <React.Fragment>
+          <IconButton size="small" aria-label="close" color="inherit" onClick={handleClose}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </React.Fragment>
+      }
+    />
   );
 };

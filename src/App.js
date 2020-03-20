@@ -6,7 +6,11 @@ import { Redirect, useLocation } from "react-router-dom";
 import { Route, Switch, BrowserRouter as Router } from "react-router-dom";
 
 import { InmatePage } from "./pages";
-import { SearchResultsTable, SearchForm as InmateSearchForm } from "./components";
+import {
+  SimpleSnackbar,
+  SearchResultsTable,
+  SearchForm as InmateSearchForm
+} from "./components";
 
 const NoMatch = () => {
   const location_ = useLocation();
@@ -17,6 +21,7 @@ export default (props) => {
 
   const [inmates, setInmates] = useState(null);
   const [formError, setFormError] = useState(null);
+  const [providerErrors, setProviderErrors] = useState([]);
 
   const fetchInmates = async (query) => {
     const url = new URL(`${props.urlBase}/inmate`);
@@ -25,6 +30,7 @@ export default (props) => {
     const json = await response.json();
     if (response.ok) {
       setInmates(json.inmates);
+      setProviderErrors(json.errors);
     } else {
       setFormError(json);
     }
@@ -74,6 +80,7 @@ export default (props) => {
     return (
       <Grid item xs={10} lg={6}>
         <SearchResultsTable inmates={inmates} onClick={handleClick} />
+        {providerErrors.map((error) => (<SimpleSnackbar message={error} />))}
       </Grid>
     );
   };

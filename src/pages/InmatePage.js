@@ -8,6 +8,7 @@ import { Card, CardHeader, CardContent } from "@material-ui/core";
 import moment from "moment";
 
 import {
+  SimpleSnackbar,
   ConfirmationDialog,
   InfoTable as InmateInfoTable,
   RequestTable as InmateRequestTable,
@@ -215,6 +216,7 @@ export default (props) => {
 
   const {jurisdiction, id} = useParams();
   const [json, setJson] = useState(null);
+  const [errors, setErrors] = useState([]);
   const [inmate, setInmate] = useState(null);
   const [requests, setRequests] = useState([]);
   const [defaultPostmarkDate, setDefaultPostmarkDate] = useState(null);
@@ -239,6 +241,7 @@ export default (props) => {
       if (response.ok) {
         const inmate = processInmate(json.inmate);
         setInmate(inmate);
+        setErrors(json.errors);
         setRequests(inmate.requests);
         setMinPostmarkTimedelta(json.minPostmarkTimedelta);
         setDefaultPostmarkDate(moment(json.datePostmarked, "YYYY-MM-DD").toDate());
@@ -282,6 +285,7 @@ export default (props) => {
           comments={inmate.comments}
         />
       </Grid>
+      {errors.map((error) => (<SimpleSnackbar message={error} />))}
     </>
   );
 };
