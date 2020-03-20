@@ -73,7 +73,7 @@ export default (props) => {
 
     return (
       <Grid item xs={10} lg={6}>
-        <SearchResultsTable inmates={inmates} onClick={handleClick} />;
+        <SearchResultsTable inmates={inmates} onClick={handleClick} />
       </Grid>
     );
   };
