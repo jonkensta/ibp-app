@@ -57,12 +57,12 @@ export default (props) => {
       return <Redirect to={{pathname: "/"}} />;
     }
 
-    if (inmates && inmates.length === 0) {
+    if (!inmates) {
       setFormError("No inmates matched your search.");
       return <Redirect to={{pathname: "/"}} />;
     }
 
-    if (inmates.length && inmates.length === 1) {
+    if (inmates.length === 1) {
       const inmate = inmates[0];
       return <Redirect to={{pathname: `/inmate/${inmate.jurisdiction}/${inmate.id}`}} />;
     }
