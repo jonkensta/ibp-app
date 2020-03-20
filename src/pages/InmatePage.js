@@ -16,11 +16,12 @@ import {
 
 export default (props) => {
 
-  const { jurisdiction, id } = useParams();
-  const [ error, setError ] = useState(null);
-  const [ inmate, setInmate ] = useState(null);
-  const [ requests, setRequests ] = useState([]);
-  const [ defaultPostmarkDate, setDefaultPostmarkDate ] = useState(null);
+  const {jurisdiction, id} = useParams();
+  const [error, setError] = useState(null);
+  const [inmate, setInmate] = useState(null);
+  const [requests, setRequests] = useState([]);
+  const [defaultPostmarkDate, setDefaultPostmarkDate] = useState(null);
+  const [minPostmarkTimedelta, setMinPostmarkTimedelta] = useState(null);
 
   useEffect(() => {
     const processInmate = (inmate) => {
@@ -41,6 +42,7 @@ export default (props) => {
         const inmate = processInmate(json.inmate);
         setInmate(inmate);
         setRequests(inmate.requests);
+        setMinPostmarkTimedelta(json.minPostmarkTimedelta);
         setDefaultPostmarkDate(moment(json.datePostmarked, "YYYY-MM-DD").toDate());
       } else {
         setError(json);
@@ -74,7 +76,6 @@ export default (props) => {
   };
 
   const RequestsCardContent = () => {
-
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogMessages, setDialogMessages] = useState([]);
     const [dialogHandler, setDialogHandler] = useState(null);
@@ -105,17 +106,14 @@ export default (props) => {
             const datePostmarked = moment(newRequest.date_postmarked);
 
             const calculateMinPostmarkDate = (requests) => {
-              const postmarkDates = (
+              const dates = (
                 requests
                 .filter((request) => request.action === "Filled")
                 .map((request) => moment(request.date_postmarked))
               );
 
-              const latestPostmarkDate = (
-                ((postmarkDates.length > 0) && moment.max(postmarkDates)) || null
-              );
-              const timedelta = inmate.min_postmarkdate_timedelta;
-              return latestPostmarkDate && latestPostmarkDate.add(timedelta, "days");
+              const latestDate = ((dates.length > 0) && moment.max(dates)) || null;
+              return latestDate && latestDate.add(minPostmarkTimedelta, "days");
             };
 
             const minPostmarkDate = calculateMinPostmarkDate(requests);
