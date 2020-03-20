@@ -15,8 +15,8 @@ const NoMatch = () => {
 
 export default (props) => {
 
-  const [ inmates, setInmates] = useState(null);
-  const [ formError, setFormError ] = useState(null);
+  const [inmates, setInmates] = useState(null);
+  const [formError, setFormError] = useState(null);
 
   const fetchInmates = async (query) => {
     const url = new URL(`${props.urlBase}/inmate`);

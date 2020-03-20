@@ -1,18 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-import { TextField, Button } from "@material-ui/core";
+import { TextField, Button, Tooltip, Badge } from "@material-ui/core";
 import { FormControl, FormHelperText } from "@material-ui/core";
 import { Table, TableBody, TableRow, TableCell, TableHead } from "@material-ui/core";
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@material-ui/core";
 
 import { makeStyles } from "@material-ui/core/styles";
 
-import MaterialTable, { MTableEditField } from "material-table";
+import MaterialTable, { MTableEditField, MTableEditRow } from "material-table";
 
 export const FullName = (props) => {
   const url = props.url;
   const fullName = props.first + " " + props.last;
-  const name = props.first && props.last&& fullName;
+  const name = props.first && props.last && fullName;
   const name_with_url = name && <a href={url}>{name}</a>;
   return name_with_url || name || <>Not Available</>;
 };
@@ -39,17 +39,69 @@ export const Sex = (props) => {
 };
 
 export const Release = (props) => {
-  return <>{props.release || "Not Available"}</>;
+  const release = (
+    (props.release.format && props.release.format("M/DD/YYYY"))
+    || props.release || "Not Available"
+  );
+
+  if (props.warning) {
+    return (
+      <Tooltip title={props.warning} color="secondary">
+        <Badge variant="dot">
+          {release}
+        </Badge>
+      </Tooltip>
+    );
+  } else {
+    return <>{release}</>;
+  }
+};
+
+export const LastVerified = (props) => {
+  const datetime = (
+    (props.datetime && props.datetime.format("M/DD/YYYY [at] HH:mm:ss"))
+    || "Not Available"
+  );
+
+  if (props.warning) {
+    return (
+      <Tooltip title={props.warning} color="secondary">
+        <Badge variant="dot">
+          <>{datetime}</>
+        </Badge>
+      </Tooltip>
+    );
+  } else {
+    return <>{datetime}</>;
+  }
 };
 
 export const InfoTable = (props) => {
   const components = {
-    "Name": <FullName first={props.first_name} last={props.last_name} url={props.url}/>,
-    "Jurisdiction": <Jurisdiction jurisdiction={props.jurisdiction}/>,
-    "ID": <FormattedID id={props.id}/>,
-    "Sex": <Sex sex={props.sex}/>,
-    "Unit": <Unit {...props.unit}/>,
-    "Release": <Release release={props.release}/>,
+    "Name": (
+      <FullName first={props.first_name} last={props.last_name} url={props.url}/>
+    ),
+    "Jurisdiction": (
+      <Jurisdiction jurisdiction={props.jurisdiction}/>
+    ),
+    "ID": (
+      <FormattedID id={props.id}/>
+    ),
+    "Sex": (
+      <Sex sex={props.sex}/>
+    ),
+    "Unit": (
+      <Unit {...props.unit}/>
+    ),
+    "Release": (
+      <Release release={props.release} warning={props.release_warning} />
+    ),
+    "Last Verified": (
+      <LastVerified
+        datetime={props.datetime_fetched}
+        warning={props.entry_age_warning}
+      />
+    ),
   };
 
   return (
@@ -71,19 +123,16 @@ export const InfoTable = (props) => {
 };
 
 export const DataTable = (props) => {
-  const [data, setData] = useState(props.data);
   const [errors, setErrors] = useState({});
 
-  class EditField extends MTableEditField {
-    render() {
-      const field = this.props.columnDef.field;
-      return (
-        <FormControl error={ field in errors }>
-          {super.render()}
-          <FormHelperText>{ (field in errors) ? errors[field] : "" }</FormHelperText>
-        </FormControl>
-      );
-    }
+  const EditField = (props) => {
+    const field = props.columnDef.field;
+    return (
+      <FormControl error={ field in errors }>
+        <MTableEditField {...props} />
+        <FormHelperText>{ (field in errors) ? errors[field] : "" }</FormHelperText>
+      </FormControl>
+    );
   };
 
   const onRowAdd = async (newData) => {
@@ -95,7 +144,7 @@ export const DataTable = (props) => {
     }
 
     if (addedRow) {
-      setData(prevState => {
+      props.setData(prevState => {
         const newState = [...prevState];
         newState.unshift(addedRow);
         return newState;
@@ -112,7 +161,7 @@ export const DataTable = (props) => {
     }
 
     if (updatedRow) {
-      setData(prevState => {
+      props.setData(prevState => {
         const newState = [...prevState];
         newState[newState.indexOf(oldData)] = updatedRow;
         return newState;
@@ -127,7 +176,7 @@ export const DataTable = (props) => {
       throw new Error("Bad response from server.")
     }
 
-    setData(prevState => {
+    props.setData(prevState => {
       const newState = [...prevState];
       newState.splice(newState.indexOf(oldData), 1);
       return newState;
@@ -150,23 +199,64 @@ export const DataTable = (props) => {
     ...(props.options || {}),
   };
 
+  let header = (props.localization && props.localization.header) || {};
+  header = {actions: "", ...header};
+  const localization = {header, ...(props.localization || {})};
+
   return (
     <MaterialTable
       {...props}
-      data={data}
+      data={props.data}
       options={options}
       components={components}
-      localization={{header: {actions: ""}}}
       editable={{
         onRowAdd: onRowAdd,
         onRowUpdate: onRowUpdate,
         onRowDelete: onRowDelete,
       }}
+      localization={localization}
     />
   );
 };
 
 export const RequestTable = ({onRequestAdd, onRequestUpdate, onRequestDelete, ...props}) => {
+
+  useEffect(() => {
+    const add = document.querySelector("button[title='Add Request']");
+    add && add.focus();
+  });
+
+  const EditRow = (props) => {
+    useEffect(() => {
+      if (props.mode === "add") {
+        const save = document.querySelector("button[title='Save']");
+        save && save.focus();
+
+        return () => {
+          setTimeout(() => {
+            const selector = "tr[index='0'] button[title='Print label']";
+            const save = document.querySelector(selector);
+            save && save.focus();
+          }, 500);
+        };
+      }
+    });
+
+    return <MTableEditRow {...props} />;
+  };
+
+  const components = {EditRow, ...(props.components || {})};
+
+  let body = (props.localization && props.localization.body) || {};
+  body = {
+    addTooltip: "Add Request",
+    deleteTooltip: "Delete Request",
+    editTooltip: "Edit Request",
+    ...body
+  };
+
+  const localization = {body, ...(props.localization || {})};
+
   return (
     <DataTable
       columns={[
@@ -183,11 +273,27 @@ export const RequestTable = ({onRequestAdd, onRequestUpdate, onRequestDelete, ..
       onRowUpdate={onRequestUpdate}
       onRowDelete={onRequestDelete}
       {...props}
+      data={props.requests}
+      setData={props.setRequests}
+      localization={localization}
+      components={components}
     />
   );
 };
 
 export const CommentTable = ({onCommentAdd, onCommentUpdate, onCommentDelete, ...props}) => {
+  const [comments, setComments] = useState(props.comments);
+
+  let body = (props.localization && props.localization.body) || {};
+  body = {
+    addTooltip: "Add Comment",
+    deleteTooltip: "Delete Comment",
+    editTooltip: "Edit Comment",
+    ...body
+  };
+
+  const localization = {body, ...(props.localization || {})};
+
   return (
     <DataTable
       columns={[
@@ -199,6 +305,9 @@ export const CommentTable = ({onCommentAdd, onCommentUpdate, onCommentDelete, ..
       onRowUpdate={onCommentUpdate}
       onRowDelete={onCommentDelete}
       {...props}
+      data={comments}
+      setData={setComments}
+      localization={localization}
     />
   );
 };

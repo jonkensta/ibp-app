@@ -18,22 +18,35 @@ export default (props) => {
 
   const { jurisdiction, id } = useParams();
   const [ error, setError ] = useState(null);
-  const [ results, setResults ] = useState(null);
+  const [ inmate, setInmate ] = useState(null);
+  const [ requests, setRequests ] = useState([]);
+  const [ defaultPostmarkDate, setDefaultPostmarkDate ] = useState(null);
 
   useEffect(() => {
+    const processInmate = (inmate) => {
+      inmate = {...inmate};
+      inmate.requests.forEach((request) => {
+        request.date_postmarked = moment(request.date_postmarked, "YYYY-MM-DD").toDate();
+      });
+      inmate.release = moment(inmate.release, "YYYY-MM-DD") || null;
+      inmate.datetime_fetched = moment(inmate.datetime_fetched, "YYYY-MM-DD hh:mm:ss") || null;
+      return inmate;
+    };
+
     const getInmate = async (jurisdiction, id) => {
       const url = `${props.urlBase}/inmate/${jurisdiction}/${id}`;
       const response = await fetch(url);
       const json = await response.json();
       if (response.ok) {
-        json.inmate.requests.forEach((request) => {
-          request.date_postmarked = moment(request.date_postmarked, "YYYY-MM-DD").toDate();
-        });
-        setResults(json);
+        const inmate = processInmate(json.inmate);
+        setInmate(inmate);
+        setRequests(inmate.requests);
+        setDefaultPostmarkDate(moment(json.datePostmarked, "YYYY-MM-DD").toDate());
       } else {
         setError(json);
       }
     };
+
     getInmate(jurisdiction, id);
   }, [props.urlBase, jurisdiction, id]);
 
@@ -41,13 +54,13 @@ export default (props) => {
     return <h3>No inmate matched given URL parameters.</h3>;
   }
 
-  if (!results) {
+  if (!inmate) {
     return <CircularProgress />;
   }
 
   const InfoCardContent = () => (
     <CardContent>
-      <InmateInfoTable {...results.inmate} />
+      <InmateInfoTable {...inmate} />
     </CardContent>
   );
 
@@ -84,14 +97,37 @@ export default (props) => {
       let request = {...newRequest, date_postmarked: datePostmarked};
 
       if (newRequest.action === "Filled") {
-        const endpoint = `${props.urlBase}/warning/${jurisdiction}/${id}`;
-        const url = `${endpoint}?datePostmarked=${datePostmarked}`
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error("Bad response from server.");
-        }
+        const getInmateWarnings = (inmate) => {
+          function* iterateInmateWarnings(inmate) {
+            yield inmate.entry_age_warning;
+            yield inmate.release_warning;
 
-        const messages = await response.json();
+            const datePostmarked = moment(newRequest.date_postmarked);
+
+            const calculateMinPostmarkDate = (requests) => {
+              const postmarkDates = (
+                requests
+                .filter((request) => request.action === "Filled")
+                .map((request) => moment(request.date_postmarked))
+              );
+
+              const latestPostmarkDate = (
+                ((postmarkDates.length > 0) && moment.max(postmarkDates)) || null
+              );
+              const timedelta = inmate.min_postmarkdate_timedelta;
+              return latestPostmarkDate && latestPostmarkDate.add(timedelta, "days");
+            };
+
+            const minPostmarkDate = calculateMinPostmarkDate(requests);
+            if (minPostmarkDate && datePostmarked.isBefore(minPostmarkDate)) {
+              yield "This request is too early from date of last request.";
+            }
+          }
+          const warnings = Array.from(iterateInmateWarnings(inmate));
+          return warnings.filter(Boolean);
+        };
+
+        const messages = getInmateWarnings(inmate);
         if (messages && messages.length > 0) {
           const feedback = await getUserFeedback(messages);
           if (feedback === "Toss") {
@@ -104,7 +140,7 @@ export default (props) => {
       const response = await fetchHelper(url, "POST", request);
       const json = await response.json();
 
-      let [data, errors] = (response.ok) ? [json, []] : [null, json]
+      let [data, errors] = (response.ok) ? [json, []] : [null, json];
 
       if (data) {
         data.date_postmarked = moment(data.date_postmarked, "YYYY-MM-DD").toDate();
@@ -137,13 +173,11 @@ export default (props) => {
 
     const downloadLabel = async (index) => {
       const element = document.createElement("a");
-
       const url = `${props.urlBase}/label/${jurisdiction}/${id}/${index}`;
       const headers = {"Content-Type": "image/png"};
       const response = await fetch(url, {headers});
       const blob = await response.blob();
       element.href = URL.createObjectURL(blob);
-
       element.click();
     };
 
@@ -157,15 +191,14 @@ export default (props) => {
       }
     });
 
-    const defaultDatePostmarked = moment(results.datePostmarked, "YYYY-MM-DD").toDate();
-
     return (
       <>
         <InmateRequestTable
           components={{Container: CardContent}}
           jurisdiction={jurisdiction} id={id}
-          data={results.inmate.requests}
-          defaultDatePostmarked={defaultDatePostmarked}
+          requests={requests}
+          setRequests={setRequests}
+          defaultDatePostmarked={defaultPostmarkDate}
           onRequestAdd={handleRequestAdd}
           onRequestUpdate={handleRequestUpdate}
           onRequestDelete={handleRequestDelete}
@@ -206,7 +239,7 @@ export default (props) => {
       <InmateCommentTable
         components={{Container: CardContent}}
         jurisdiction={jurisdiction} id={id}
-        data={results.inmate.comments}
+        comments={inmate.comments}
         onCommentAdd={handleCommentAdd}
         onCommentUpdate={handleCommentUpdate}
         onCommentDelete={handleCommentDelete}
